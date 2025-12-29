@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes } = require('sequelize'); 
 const sequelize = require('../database');
 
 const Conference = sequelize.define('Conference', {
@@ -11,5 +11,10 @@ const Conference = sequelize.define('Conference', {
     },
     description: {
         type: DataTypes.TEXT
+    },
+    organizerId: { 
+        type: DataTypes.INTEGER, allowNull: false  //added organizerId to link to User model
     }
 });
+
+module.exports = Conference; //added missing module export
