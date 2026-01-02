@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const ReviewerDashboard = ({ currentUser }) => {
     const [myReviews, setMyReviews] = useState([]);
-    const [feedback, setFeedback] = useState("");
+    const [feedbackMap, setFeedbackMap] = useState({});
 
     useEffect(() => {
         axios.get('http://localhost:3000/reviews')
@@ -14,32 +14,56 @@ const ReviewerDashboard = ({ currentUser }) => {
             .catch(err => console.error(err));
     }, [currentUser.id]);
 
+    const handleTextChange = (reviewId, value) => {
+        setFeedbackMap({...feedbackMap, [reviewId]: value});
+    };
+
     const submitFeedback = (reviewId) => {
+        const textToSubmit = feedbackMap[reviewId] || "";
+
         axios.put(`http://localhost:3000/reviews/${reviewId}`, {
-            feedback: feedback,
+            feedback: textToSubmit,
             status: 'completed'
         })
             .then(() => {
-                alert("Review submitted!");
-                setMyReviews(myReviews.map(r => r.id === reviewId ? { ...r, status: 'completed' } : r));
+                alert("Review sucessfully submitted!");
+                setMyReviews(myReviews.map(r => r.id === reviewId ? { ...r, status: 'completed', 
+                    feedback: textToSubmit } : r));
             });
     };
 
     return (
-        <div>
+        <div style={{ padding: '20px', fontFamily: 'Arial' }}>
             <h1>Reviewer Dashboard</h1>
-            {myReviews.map(review => (
-                <div key={review.id} style={{ border: '1px solid black', margin: '10px', padding: '10px' }}>
-                    <p>Article ID: {review.articleId} - Status {review.status}</p>
-                    {review.status === 'pending' && (
-                        <div>
-                            <textarea
-                                placeholder='Enter feedback...'
-                                onChange={(e) => setFeedback(e.target.value)}
-                            />
-                            <button onClick={() => submitFeedback(review.id)}>Submit Feedback</button>
-                        </div>
-                    )}
+            <p>Welcome, Reviewer #{currentUser.id}</p>
+
+            <h2>Pending Reviews</h2>
+            {myReviews.filter(r => r.status === 'pending').map(review => (
+                <div key={review.id} style={{ border: '1px solid #ccc', borderRadius: '8px', margin: '10px 0', padding: '15px' }}>
+                    <strong>Article ID: {review.articleId}</strong>
+                    <div style={{ marginTop: '10px' }}>
+                        <textarea
+                            style={{ width: '100%', minHeight: '80px' }}
+                            placeholder='Enter constructive feedback...'
+                            value={feedbackMap[review.id] || ""}
+                            onChange={(e) => handleTextChange(review.id, e.target.value)}
+                        />
+                        <button 
+                            onClick={() => submitFeedback(review.id)}
+                            style={{ marginTop: '10px', backgroundColor: '#007bff', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}
+                        >
+                            Submit Final Review
+                        </button>
+                    </div>
+                </div>
+            ))}
+
+            <h2 style={{ marginTop: '40px' }}>Completed History</h2>
+            {myReviews.filter(r => r.status === 'completed').map(review => (
+                <div key={review.id} style={{ border: '1px solid #eee', backgroundColor: '#f9f9f9', margin: '10px 0', padding: '15px', borderRadius: '8px' }}>
+                    <p><strong>Article ID:</strong> {review.articleId}</p>
+                    <p><strong>Your Feedback:</strong> {review.feedback}</p>
+                    <span style={{ color: 'green', fontWeight: 'bold' }}>✓ Completed</span>
                 </div>
             ))}
         </div>
