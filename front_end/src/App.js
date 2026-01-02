@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import ReviewerDashboard from './ReviewerDashboard';
+import AuthorDashboard from './AuthorDashboard';
 
 function App() {
   return (
