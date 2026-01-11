@@ -6,6 +6,8 @@ const User = require('./models/User');
 const Conference = require('./models/Conference');
 const Article = require('./models/Article');
 const Review = require('./models/Review');
+// Link Reviews to Articles so we can fetch article details with a review
+Review.belongsTo(Article, { foreignKey: 'articleId' });
 
 //initializing the app
 const app = express();
@@ -59,26 +61,51 @@ app.get('/conferences', async(req, res)=>{
     }
 });
 
-//Submit Feedback
-app.put('/reviews/:id', async(req, res) =>{
-    try{
-        await Review.update(req.body, {where: {id: req.params.id}});
-        res.json({message: "Review updated"});
-    } catch(e){
+// Updated Submit Feedback Route
+app.put('/reviews/:id', async (req, res) => {
+    try {
+        // 1. Update the specific review feedback and status to 'completed'
+        await Review.update(req.body, { where: { id: req.params.id } });
+
+        // 2. Find this specific review to identify the associated article
+        const updatedReview = await Review.findByPk(req.params.id);
+        const articleId = updatedReview.articleId;
+
+        // 3. Check if there are any 'pending' reviews left for this article
+        const pendingReviews = await Review.findAll({
+            where: {
+                articleId: articleId,
+                status: 'pending'
+            }
+        });
+
+        // 4. If no pending reviews remain (length is 0), update the Article status
+        if (pendingReviews.length === 0) {
+            await Article.update(
+                { status: 'approved' }, 
+                { where: { id: articleId } }
+            );
+            console.log(`Article #${articleId} has been automatically approved.`);
+        }
+
+        res.json({ message: "Review updated and article status checked" });
+    } catch (e) {
+        console.error(e);
         res.status(500).json(e);
     }
 });
 
-//Get all Reviews
+// Get all Reviews with Article details
 app.get('/reviews', async(req, res) =>{
     try{
-        const reviews = await Review.findAll();
+        const reviews = await Review.findAll({
+            include: [{ model: Article }] // This "joins" the Article data
+        });
         res.json(reviews);
     } catch(e){
         res.status(500).json(e);
     }
-})
-
+});
 // Upload Article and Assign Reviewers
 app.post('/articles', async (req, res) => {
     try {
@@ -121,6 +148,16 @@ app.post('/articles', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error uploading article" }); // Internal Server Error
+    }
+});
+
+// Get all articles for the Organizer
+app.get('/articles', async (req, res) => {
+    try {
+        const articles = await Article.findAll();
+        res.json(articles);
+    } catch (e) {
+        res.status(500).json(e);
     }
 });
 

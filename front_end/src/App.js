@@ -1,10 +1,9 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import axios from "axios";
 import './App.css';
 import ReviewerDashboard from './ReviewerDashboard';
 import AuthorDashboard from './AuthorDashboard';  
 import OrganizerDashboard from "./OrganizerDashboard";
-
 
 function App() {
   const [email, setEmail] = useState("");
@@ -22,8 +21,23 @@ function App() {
       alert("Login failed");
     }
   };
+
+  // Function to clear user state and "log out"
+  const handleLogout = () => {
+    setUser(null);
+    setEmail("");
+    setPassword("");
+  };
+
+  // Role-based routing logic
   if (user) {
-    return <OrganizerDashboard user={user} />;
+    if (user.role === 'organizer') {
+      return <OrganizerDashboard user={user} onLogout={handleLogout} />;
+    } else if (user.role === 'author') {
+      return <AuthorDashboard currentUser={user} onLogout={handleLogout} />;
+    } else if (user.role === 'reviewer') {
+      return <ReviewerDashboard currentUser={user} onLogout={handleLogout} />;
+    }
   }
   
   return (
@@ -46,8 +60,6 @@ function App() {
       <br /><br />
 
       <button onClick={handleLogin}>Login</button>
-
-      {user && <p>Logged in as {user.email}</p>}
     </div>
   );
 }
