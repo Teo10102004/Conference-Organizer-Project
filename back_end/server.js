@@ -61,36 +61,34 @@ app.get('/conferences', async(req, res)=>{
     }
 });
 
-// Updated Submit Feedback Route
 app.put('/reviews/:id', async (req, res) => {
     try {
-        // 1. Update the specific review feedback and status to 'completed'
+        // 1. Wait for the update to finish
         await Review.update(req.body, { where: { id: req.params.id } });
 
-        // 2. Find this specific review to identify the associated article
+        // 2. Fetch the review to get the correct articleId
         const updatedReview = await Review.findByPk(req.params.id);
         const articleId = updatedReview.articleId;
 
-        // 3. Check if there are any 'pending' reviews left for this article
+        // 3. Count how many reviews are STILL pending for this article
         const pendingReviews = await Review.findAll({
             where: {
                 articleId: articleId,
-                status: 'pending'
+                status: 'pending' // Looking for reviews that haven't been completed yet
             }
         });
 
-        // 4. If no pending reviews remain (length is 0), update the Article status
+        // 4. If the list is empty, update the Article to 'approved'
         if (pendingReviews.length === 0) {
             await Article.update(
                 { status: 'approved' }, 
                 { where: { id: articleId } }
             );
-            console.log(`Article #${articleId} has been automatically approved.`);
+            console.log(`Article #${articleId} is now approved.`);
         }
 
-        res.json({ message: "Review updated and article status checked" });
+        res.json({ message: "Success" });
     } catch (e) {
-        console.error(e);
         res.status(500).json(e);
     }
 });

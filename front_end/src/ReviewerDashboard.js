@@ -19,16 +19,22 @@ const ReviewerDashboard = ({ currentUser, onLogout }) => {
     };
 
     const submitFeedback = (reviewId) => {
-        const textToSubmit = feedbackMap[reviewId] || "";
-        axios.put(`http://localhost:3000/reviews/${reviewId}`, {
-            feedback: textToSubmit,
-            status: 'completed'
-        })
-        .then(() => {
-            alert("Review successfully submitted!");
-            setMyReviews(myReviews.map(r => r.id === reviewId ? { ...r, status: 'completed', feedback: textToSubmit } : r));
-        });
-    };
+    const textToSubmit = feedbackMap[reviewId] || "";
+
+    axios.put(`http://localhost:3000/reviews/${reviewId}`, {
+        feedback: textToSubmit,
+        status: 'completed' 
+    })
+    .then(() => {
+        alert("Review successfully submitted!");
+        setMyReviews(myReviews.map(r => r.id === reviewId ? { 
+            ...r, 
+            status: 'completed', 
+            feedback: textToSubmit 
+        } : r));
+    })
+    .catch(err => console.error("Update failed:", err));
+};
 
     return (
         <div style={{ padding: '20px', fontFamily: 'Arial' }}>
