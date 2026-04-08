@@ -1,5 +1,7 @@
 # ConfHub – Conference Management Web Application
 
+*This project was developed for my Web Technologies class.*
+
 ## Overview
 ConfHub is a web application designed to manage scientific conferences.  
 It supports user registration, conference creation, paper submission, automatic reviewer assignment, reviewing workflows, and paper versioning.
@@ -16,7 +18,6 @@ The application uses:
 Develop a modern web application that allows organizers, authors, and reviewers to coordinate conferences, submit papers, review submissions, and track statuses efficiently.
 
 ---
-
 
 # User Roles
 
@@ -62,7 +63,6 @@ Backend (Node.js + Express REST API)
 Relational Database (PostgreSQL/MySQL via ORM)
 ↓
 External API
-
 
 ---
 
@@ -159,12 +159,10 @@ GET /api/conferences/:id/papers
 GET /api/papers/:id
 POST /api/papers/:id/versions
 
-
 ### Reviews
 
 GET /api/reviews/my
 POST /api/papers/:id/reviews
-
 
 ---
 
@@ -185,7 +183,6 @@ package.json
 
 README.md
 
-
 ---
 
 ## Run Instructions
@@ -196,13 +193,11 @@ cd backend
 npm install
 npm run dev
 
-
 ### Frontend
 
 cd frontend
 npm install
 npm start
-
 
 ---
 
@@ -234,4 +229,4 @@ npm start
 - Integration frontend-backend  
 - External API integration  
 - Deployment  
-- Optional tests  
+- Optional tests
